@@ -1,14 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   ThirdwebProvider,
   ConnectButton,
   useActiveAccount,
-  TransactionButton,
 } from "thirdweb/react";
-
-import { getContract } from "thirdweb";
 
 import { thirdwebclient } from "@/utils/thirdweb/client";
 

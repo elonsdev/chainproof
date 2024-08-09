@@ -4,7 +4,7 @@ import { EAS, Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { ethers } from "ethers";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { bytesToString, hexToString } from "thirdweb";
+import { hexToString } from "thirdweb";
 
 const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia testnet
 
