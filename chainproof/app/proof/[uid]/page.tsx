@@ -101,7 +101,7 @@ export default function AttestationDetails({
                   />
                 </div>
               </div>
-              <div className='text-white absolute bottom-10 -right-10'>
+              <div className='text-white absolute bottom-20 right-10'>
                 <Image
                   alt='Chain Proof Stamp'
                   width={100}
