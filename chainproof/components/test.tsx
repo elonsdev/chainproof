@@ -6,7 +6,7 @@ export default async function Test() {
 
   return (
     <>
-      <h2>Recent Notaries</h2>
+      <h2 className='font-light text-lg'>Most Recent Signatures</h2>
       <pre>{JSON.stringify(notes, null, 2)}</pre>
     </>
   );

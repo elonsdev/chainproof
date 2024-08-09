@@ -6,6 +6,7 @@ import SignUpUserSteps from "@/components/tutorial/SignUpUserSteps";
 import Header from "@/components/Header";
 import Test from "@/components/test";
 import FileUpload from "@/components/Uploader";
+import Image from "next/image";
 
 export default async function Index() {
   const canInitSupabaseClient = () => {
@@ -25,8 +26,12 @@ export default async function Index() {
     <div className='flex-1 w-full flex flex-col gap-20 items-center'>
       <nav className='w-full flex justify-center border-b border-b-foreground/10 h-16'>
         <div className='w-full max-w-4xl flex justify-between items-center p-3 text-sm'>
-          <DeployButton />
-          {isSupabaseConnected && <AuthButton />}
+          <Image
+            alt='Chain Proof Stamp'
+            width={100}
+            height={100}
+            src={"/chainprooflogo.png"}
+          />
         </div>
       </nav>
 

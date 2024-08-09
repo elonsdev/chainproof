@@ -14,6 +14,8 @@ import { thirdwebclient } from "@/utils/thirdweb/client";
 
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { ethers } from "ethers";
+import Image from "next/image";
+import Link from "next/link";
 
 const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia testnet
 const schemaUID =
@@ -24,6 +26,8 @@ function Home() {
   const [fileHash, setFileHash] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
   const [fileName, setFileName] = useState("");
+  const [name, setName] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const address = useActiveAccount();
 
@@ -45,14 +49,25 @@ function Home() {
         const hash = await hashFile(file);
         setFileHash(hash);
         setFileName(file.name);
-        setUploadStatus(`File hashed successfully. Hash: ${hash}`);
       } catch (error: any) {
         console.error("Error processing file:", error);
-        setUploadStatus(`Error: ${error.message}`);
       } finally {
         setIsUploading(false);
       }
     }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText(`https://chainproof.elons.dev/proof/${uploadStatus}`)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000); // Remove "Copied!" message after 2 seconds
+      })
+      .catch((err) => {
+        console.error("Failed to copy address:", err);
+        // Handle copy failure, e.g., display an error message
+      });
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -76,7 +91,7 @@ function Home() {
       { name: "contentHash", value: fileHash, type: "bytes32" },
       { name: "createdAt", value: new Date().toISOString(), type: "string" },
       { name: "fileName", value: fileName, type: "string" },
-      { name: "Name", value: "test", type: "string" },
+      { name: "Name", value: name, type: "string" },
     ]);
 
     const tx = await eas.attest({
@@ -90,18 +105,19 @@ function Home() {
     });
 
     const newAttestationUID = await tx.wait();
+    setUploadStatus(`${newAttestationUID}`);
     return newAttestationUID;
   };
 
   return (
-    <div className='min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12'>
+    <div className=' flex flex-col justify-center sm:py-12'>
       <div className='relative py-3 sm:max-w-xl sm:mx-auto'>
         <div className='absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl'></div>
-        <div className='relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20'>
+        <div className='relative px-4 py-10 bg-black shadow-lg sm:rounded-3xl sm:p-20'>
           <div className='max-w-md mx-auto'>
             <div>
-              <h1 className='text-2xl font-semibold text-center mb-5'>
-                ChainStamp: Secure Document Notarization
+              <h1 className='text-4xl font-light text-center mb-5'>
+                ChainProof: Secure Document Notarization
               </h1>
               <div className='flex justify-center mb-5'>
                 <ConnectButton client={thirdwebclient} />
@@ -111,21 +127,85 @@ function Home() {
               <div className='py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7'>
                 {address ? (
                   <>
-                    <div
-                      {...getRootProps()}
-                      className='border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500'
-                    >
-                      <input {...getInputProps()} />
-                      <p className='text-center'>
-                        {isDragActive
-                          ? "Drop the file here ..."
-                          : "Drag 'n' drop a file here, or click to select a file"}
-                      </p>
-                    </div>
+                    {!fileHash && (
+                      <>
+                        <div
+                          {...getRootProps()}
+                          className='border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500'
+                        >
+                          <input {...getInputProps()} />
+                          <p className='text-center text-sm'>
+                            {isDragActive
+                              ? "Drop the file here ..."
+                              : "Drag 'n' drop a file here, or click to select a file"}
+                          </p>
+                        </div>
+                      </>
+                    )}
+
                     {fileHash && (
-                      <button onClick={attestOnBlockchain}>
-                        Attest Document
-                      </button>
+                      <>
+                        <div className=''>
+                          <p className='text-gray-500'>Name</p>
+                          <input
+                            type='text'
+                            onChange={(value) => {
+                              setName(value.target.value);
+                            }}
+                            className='p-3 text-sm rounded bg-gray-800 text-white'
+                            placeholder={fileName}
+                          />
+                        </div>
+                        <div className=''>
+                          <p className='text-gray-500'>File Name</p>
+                          <p className='text-gray-300 text-sm'>{fileName}</p>
+                        </div>
+
+                        <div className=''>
+                          <p className='text-gray-500'>Hash</p>
+                          <p className='text-gray-300 text-sm'>
+                            {fileHash?.slice(0, 20)}...
+                            {fileHash?.slice(-20)}
+                          </p>
+                        </div>
+                        <div className=''>
+                          <p className='text-gray-500'>Created</p>
+                          <p className='text-gray-300 text-sm'>
+                            {new Date().toISOString()}
+                          </p>
+                        </div>
+                        <div className=''>
+                          <p className='text-gray-500'>Address</p>
+                          <p className='text-gray-300 text-sm'>
+                            {address.address}
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    {fileHash && (
+                      <div className='relative'>
+                        {!uploadStatus && (
+                          <>
+                            {" "}
+                            <button
+                              className='bg-white rounded p-3  font-semibold'
+                              onClick={attestOnBlockchain}
+                            >
+                              Notarize File
+                            </button>
+                          </>
+                        )}
+
+                        <div className='text-white absolute -top-10 -right-10'>
+                          <Image
+                            alt='Chain Proof Stamp'
+                            width={100}
+                            height={100}
+                            src={"/chainproofstamp1.png"}
+                          />
+                        </div>
+                      </div>
                     )}
                   </>
                 ) : (
@@ -133,6 +213,37 @@ function Home() {
                     Please connect your wallet to upload and attest documents.
                   </p>
                 )}
+
+                {uploadStatus && (
+                  <>
+                    <div>
+                      <p className='text-gray-500'>File Notarized Onchain:</p>
+                      <Link
+                        className='text-green-300 text-sm'
+                        href={`./proof/${uploadStatus}`}
+                        target='_blank'
+                      >
+                        {uploadStatus?.slice(0, 20)}...
+                        {uploadStatus?.slice(-20)}
+                      </Link>
+                      <div>
+                        {copied ? (
+                          <button className=' bg-white font-semibold rounded text-sm p-3 mt-2'>
+                            copied
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleCopy}
+                            className=' bg-white font-semibold rounded text-sm p-3 mt-2'
+                          >
+                            copy link
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 {isUploading && (
                   <div className='text-center'>
                     <p>Uploading and hashing...</p>
@@ -140,11 +251,6 @@ function Home() {
                       <div className='bg-blue-600 h-2.5 rounded-full w-1/2 animate-pulse'></div>
                     </div>
                   </div>
-                )}
-                {uploadStatus && (
-                  <pre className='mt-2 text-sm text-green-600 whitespace-pre-wrap break-words'>
-                    {uploadStatus}
-                  </pre>
                 )}
               </div>
             </div>
