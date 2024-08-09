@@ -17,16 +17,16 @@ import { ethers } from "ethers";
 import Image from "next/image";
 import Link from "next/link";
 
-const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia testnet
+const EASContractAddress = "0x4200000000000000000000000000000000000021";
 const schemaUID =
-  "0x4a510ad3363fb6ed8c4c3eb0d1224c17b0acda7802611aa578a8dc3e92c6e13a"; // Replace with your actual schema UID
+  "0xf45c6e55054f7fd137b4e6edb1f5ab81d801e3e175b0675b07750e3eb4fe790c";
 
 function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [fileHash, setFileHash] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
   const [fileName, setFileName] = useState("");
-  const [name, setName] = useState("");
+  const [timeNow, setTimeNow] = useState("");
   const [copied, setCopied] = useState(false);
 
   const address = useActiveAccount();
@@ -49,6 +49,7 @@ function Home() {
         const hash = await hashFile(file);
         setFileHash(hash);
         setFileName(file.name);
+        setTimeNow(new Date().toISOString());
       } catch (error: any) {
         console.error("Error processing file:", error);
       } finally {
@@ -84,14 +85,12 @@ function Home() {
     eas.connect(signer);
 
     const schemaEncoder = new SchemaEncoder(
-      "bytes32 contentHash,string createdAt,string fileName,string Name"
+      "bytes32 contentHash,string fileName"
     );
 
     const encodedData = schemaEncoder.encodeData([
       { name: "contentHash", value: fileHash, type: "bytes32" },
-      { name: "createdAt", value: new Date().toISOString(), type: "string" },
       { name: "fileName", value: fileName, type: "string" },
-      { name: "Name", value: name, type: "string" },
     ]);
 
     const tx = await eas.attest({
@@ -110,14 +109,14 @@ function Home() {
   };
 
   return (
-    <div className=' flex flex-col justify-center sm:py-12'>
+    <div className=' flex flex-col justify-center sm:py-2'>
       <div className='relative py-3 sm:max-w-xl sm:mx-auto'>
         <div className='absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl'></div>
-        <div className='relative px-4 py-10 bg-black shadow-lg sm:rounded-3xl sm:p-20'>
+        <div className='relative px-4 py-4 bg-black shadow-lg sm:rounded-3xl sm:p-20'>
           <div className='max-w-md mx-auto'>
             <div>
               <h1 className='text-4xl font-light text-center mb-5'>
-                ChainProof: Secure Document Notarization
+                ChainProof: Secure File Notarization
               </h1>
               <div className='flex justify-center mb-5'>
                 <ConnectButton client={thirdwebclient} />
@@ -146,36 +145,22 @@ function Home() {
                     {fileHash && (
                       <>
                         <div className=''>
-                          <p className='text-gray-500'>Name</p>
-                          <input
-                            type='text'
-                            onChange={(value) => {
-                              setName(value.target.value);
-                            }}
-                            className='p-3 text-sm rounded bg-gray-800 text-white'
-                            placeholder={fileName}
-                          />
-                        </div>
-                        <div className=''>
                           <p className='text-gray-500'>File Name</p>
                           <p className='text-gray-300 text-sm'>{fileName}</p>
                         </div>
 
                         <div className=''>
                           <p className='text-gray-500'>Hash</p>
-                          <p className='text-gray-300 text-sm'>
-                            {fileHash?.slice(0, 20)}...
-                            {fileHash?.slice(-20)}
+                          <p className='text-gray-300 text-sm break-words'>
+                            {fileHash}
                           </p>
                         </div>
                         <div className=''>
                           <p className='text-gray-500'>Created</p>
-                          <p className='text-gray-300 text-sm'>
-                            {new Date().toISOString()}
-                          </p>
+                          <p className='text-gray-300 text-sm'>{timeNow}</p>
                         </div>
                         <div className=''>
-                          <p className='text-gray-500'>Address</p>
+                          <p className='text-gray-500'>Signer</p>
                           <p className='text-gray-300 text-sm'>
                             {address.address}
                           </p>
@@ -210,7 +195,7 @@ function Home() {
                   </>
                 ) : (
                   <p className='text-center'>
-                    Please connect your wallet to upload and attest documents.
+                    Please connect your wallet to upload and notarize files.
                   </p>
                 )}
 
