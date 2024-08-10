@@ -141,6 +141,11 @@ function Home() {
                               : "Drag 'n' drop a file here, or click to select a file"}
                           </p>
                         </div>
+                        <p className='text-sm'>
+                          A secure encrypted hash is produced from the file
+                          locally, it is not uploaded online or stored by this
+                          website.
+                        </p>
                       </>
                     )}
 
