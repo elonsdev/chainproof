@@ -20,6 +20,7 @@ const schemaUID =
 
 function Home() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isAttesting, setIsAttesting] = useState(false);
   const [fileHash, setFileHash] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
   const [fileName, setFileName] = useState("");
@@ -90,6 +91,8 @@ function Home() {
       { name: "fileName", value: fileName, type: "string" },
     ]);
 
+    setIsAttesting(true);
+
     const tx = await eas.attest({
       schema: schemaUID,
       data: {
@@ -102,6 +105,8 @@ function Home() {
 
     const newAttestationUID = await tx.wait();
     setUploadStatus(`${newAttestationUID}`);
+
+    setIsAttesting(false);
     return newAttestationUID;
   };
 
@@ -169,13 +174,27 @@ function Home() {
                       <div className='relative'>
                         {!uploadStatus && (
                           <>
-                            {" "}
-                            <button
-                              className='bg-white rounded p-3  font-semibold'
-                              onClick={attestOnBlockchain}
-                            >
-                              Notarize File
-                            </button>
+                            {isAttesting ? (
+                              <>
+                                {" "}
+                                <button
+                                  disabled
+                                  className='bg-gray-500 rounded p-3  font-semibold animate-pulse'
+                                >
+                                  Notarizing...
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {" "}
+                                <button
+                                  className='bg-white rounded p-3  font-semibold'
+                                  onClick={attestOnBlockchain}
+                                >
+                                  Notarize File
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
 

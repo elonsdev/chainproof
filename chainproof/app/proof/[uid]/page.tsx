@@ -83,7 +83,9 @@ export default function AttestationDetails({
                     <div className=''>
                       <p className='text-gray-500'>Created</p>
                       <p className='text-gray-300 text-sm'>
-                        {attestation[2].toString()}
+                        {new Date(
+                          Number(attestation[2]) * 1000
+                        ).toLocaleString()}
                       </p>
                     </div>
                     <div className=''>
