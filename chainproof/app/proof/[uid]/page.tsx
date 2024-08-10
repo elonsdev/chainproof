@@ -3,6 +3,7 @@
 import { EAS, Attestation } from "@ethereum-attestation-service/eas-sdk";
 import { ethers } from "ethers";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { hexToString } from "thirdweb";
 
@@ -94,7 +95,16 @@ export default function AttestationDetails({
                     </div>
                   </>
 
-                  <h1>The above file hash has been notarized Onchain.</h1>
+                  <h1>
+                    The above file hash has been notarized{" "}
+                    <Link
+                      href={`https://base.easscan.org/attestation/view/${params.uid}`}
+                      target='_blank'
+                      className=' underline '
+                    >
+                      Onchain.
+                    </Link>
+                  </h1>
                   <Image
                     alt='Chain Proof Logo'
                     width={75}
