@@ -6,8 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { hexToString } from "thirdweb";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import CertificatePDF from "./CertificatePDF";
 
-const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia testnet
+const EASContractAddress = "0x4200000000000000000000000000000000000021";
 
 export default function AttestationDetails({
   params,
@@ -112,6 +114,28 @@ export default function AttestationDetails({
                     src={"/chainprooflogo.png"}
                   />
                 </div>
+              </div>
+              <div className='flex justify-center mt-4'>
+                {attestation && (
+                  <PDFDownloadLink
+                    document={
+                      <CertificatePDF
+                        fileName={hexToString(attestation[9].slice(192))}
+                        fileHash={attestation[9].slice(0, 66)}
+                        created={new Date(
+                          Number(attestation[2]) * 1000
+                        ).toLocaleString()}
+                        signer={attestation[7]}
+                        url={`https://chainproof.elons.dev/proof/${params.uid}`}
+                      />
+                    }
+                    fileName='ChainProof_Certificate.pdf'
+                  >
+                    {({ blob, url, loading, error }) =>
+                      loading ? "Loading document..." : "Download as PDF"
+                    }
+                  </PDFDownloadLink>
+                )}
               </div>
               <div className='text-white absolute bottom-20 right-10'>
                 <Image
